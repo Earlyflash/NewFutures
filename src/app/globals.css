@@ -1,0 +1,8 @@
+/* GDS (GOV.UK Design System) is loaded from /govuk/govuk-frontend.min.css */
+/* Minimal overrides only - use GDS classes in components */
+
+/* Ensure app content uses GDS container when inside (app) layout */
+.govuk-main-wrapper {
+  padding-top: 20px;
+  padding-bottom: 40px;
+}

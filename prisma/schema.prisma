@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  role          String    @default("EMPLOYEE") // EMPLOYEE | MANAGER | HR
+  managerId     String?
+  manager       User?     @relation("ManagerReports", fields: [managerId], references: [id])
+  directReports User[]    @relation("ManagerReports")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  objectives    Objective[]
+  reviewsGiven  Review[]   @relation("ReviewsGiven")
+  eoyReports    EOYReport[]
+}
+
+model EOYReport {
+  id                  String    @id @default(cuid())
+  userId              String
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviewCycleId       String
+  reviewCycle         ReviewCycle @relation(fields: [reviewCycleId], references: [id], onDelete: Cascade)
+  status              String    @default("DRAFT") // DRAFT | SUBMITTED | APPROVED
+  selfOverallRating   Int?     // 1-5 overall (employee)
+  managerOverallRating Int?    // 1-5 (manager)
+  managerComment      String?
+  submittedAt         DateTime?
+  approvedAt          DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@unique([userId, reviewCycleId])
+}
+
+model ReviewCycle {
+  id          String   @id @default(cuid())
+  name        String   // e.g. "FY2025", "Q1 2025"
+  startDate   DateTime
+  endDate     DateTime
+  status      String   @default("DRAFT") // DRAFT | OPEN | IN_REVIEW | CLOSED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  objectives  Objective[]
+  eoyReports  EOYReport[]
+}
+
+model Objective {
+  id            String   @id @default(cuid())
+  title         String
+  description   String?
+  weight        Int      @default(100) // relative weight for scoring
+  reviewCycleId String
+  reviewCycle   ReviewCycle @relation(fields: [reviewCycleId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  reviews       Review[]
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  objectiveId String
+  objective   Objective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  type        String   // SELF | MANAGER
+  rating      Int?     // 1-5 or similar
+  comment     String?
+  reviewerId  String
+  reviewer    User     @relation("ReviewsGiven", fields: [reviewerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([objectiveId, type])
+}

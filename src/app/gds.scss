@@ -1,0 +1,4 @@
+// GDS (GOV.UK Design System) – assets served from /govuk/assets/
+@use "govuk-frontend/govuk/all" with (
+  $govuk-assets-path: "/govuk/assets/"
+);
