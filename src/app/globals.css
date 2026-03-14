@@ -6,3 +6,20 @@
   padding-top: 20px;
   padding-bottom: 40px;
 }
+
+/* EOY report steps: keep all step labels left-aligned (GOV.UK list + button can misalign item 2 etc.) */
+.eoy-report-steps {
+  text-align: left;
+}
+.eoy-report-steps ol {
+  text-align: left;
+  list-style-position: outside;
+}
+.eoy-report-steps li {
+  text-align: left;
+}
+.eoy-report-steps li button {
+  display: inline;
+  width: auto;
+  text-align: left;
+}

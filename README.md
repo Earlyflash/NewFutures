@@ -19,8 +19,12 @@ End-of-year performance and objectives application. Set objectives, complete sel
 - **Manager review**  
   Managers see direct reports under **Team**, open each person, and add ratings and feedback per objective.
 
+- **End of year (EOY) workflow**  
+  - **Employee:** On **End of year**, pick a review cycle, see objectives summary and set an **overall self-rating** (1–5). Click **Submit to manager** to send the report (no further edits after submit).  
+  - **Manager:** **Pending approvals** shows reports submitted by direct reports. Open one to see objectives and per-objective ratings, then set your **overall EOY rating** and **comment** and **Approve report**.
+
 - **Profile**  
-  View and edit your display name. Manager and role are shown (from DB; with OIDC they’d come from the IdP).
+  View and edit your display name. Set your manager from a dropdown of all users. Manager and role are shown (from DB; with OIDC they’d come from the IdP).
 
 - **Dashboard**  
   Quick view of your objective count, open cycles, and (for managers) number of direct reports.

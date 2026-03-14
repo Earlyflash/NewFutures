@@ -7,14 +7,16 @@ export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return null;
 
-  const [cycles, objectives, directReports] = await Promise.all([
+  const [cycles, objectives, pendingCount] = await Promise.all([
     prisma.reviewCycle.findMany({
       where: { status: "OPEN" },
       orderBy: { endDate: "desc" },
       take: 3,
     }),
     prisma.objective.count({ where: { userId: session.user.id } }),
-    prisma.user.count({ where: { managerId: session.user.id } }),
+    prisma.eOYReport.count({
+      where: { user: { managerId: session.user.id }, status: "SUBMITTED" },
+    }),
   ]);
 
   return (
@@ -40,17 +42,17 @@ export default async function DashboardPage() {
             </div>
           </div>
         </div>
-        {directReports > 0 && (
+        {pendingCount > 0 && (
           <div className="govuk-grid-column-one-half">
             <div className="govuk-card govuk-card--clickable">
               <div className="govuk-card__content">
                 <h2 className="govuk-heading-m govuk-card__heading">
-                  <Link href="/team" className="govuk-link govuk-card__link">
-                    Team reviews
+                  <Link href="/eoy/pending" className="govuk-link govuk-card__link">
+                    Pending approvals
                   </Link>
                 </h2>
-                <p className="govuk-heading-xl govuk-!-margin-bottom-1">{directReports}</p>
-                <p className="govuk-body govuk-!-margin-bottom-0">Direct reports to review</p>
+                <p className="govuk-heading-xl govuk-!-margin-bottom-1">{pendingCount}</p>
+                <p className="govuk-body govuk-!-margin-bottom-0">Reports submitted by your direct reports</p>
               </div>
             </div>
           </div>

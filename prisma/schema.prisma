@@ -24,19 +24,20 @@ model User {
 }
 
 model EOYReport {
-  id                  String    @id @default(cuid())
-  userId              String
-  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  reviewCycleId       String
-  reviewCycle         ReviewCycle @relation(fields: [reviewCycleId], references: [id], onDelete: Cascade)
-  status              String    @default("DRAFT") // DRAFT | SUBMITTED | APPROVED
-  selfOverallRating   Int?     // 1-5 overall (employee)
-  managerOverallRating Int?    // 1-5 (manager)
-  managerComment      String?
-  submittedAt         DateTime?
-  approvedAt          DateTime?
-  createdAt           DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  id                     String    @id @default(cuid())
+  userId                 String
+  user                   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviewCycleId          String
+  reviewCycle            ReviewCycle @relation(fields: [reviewCycleId], references: [id], onDelete: Cascade)
+  status                 String    @default("DRAFT") // DRAFT | SUBMITTED | APPROVED
+  selfOverallRating      Int?      // 1-5 overall (employee)
+  managerOverallRating   Int?      // 1-5 overall (manager)
+  managerRecommendation  String?   // recommendation based on objective ratings
+  managerComment        String?
+  submittedAt            DateTime?
+  approvedAt             DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
 
   @@unique([userId, reviewCycleId])
 }
@@ -75,6 +76,7 @@ model Review {
   objective   Objective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
   type        String   // SELF | MANAGER
   rating      Int?     // 1-5 or similar
+  outcome     String?  // NOT_MET | PARTIALLY_MET | MET | EXCEEDED (manager EoY per-objective)
   comment     String?
   reviewerId  String
   reviewer    User     @relation("ReviewsGiven", fields: [reviewerId], references: [id], onDelete: Cascade)

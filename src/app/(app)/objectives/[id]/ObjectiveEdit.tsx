@@ -2,6 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+
+const OUTCOME_LABEL: Record<string, string> = {
+  NOT_MET: "Not met",
+  PARTIALLY_MET: "Partially met",
+  MET: "Met",
+  EXCEEDED: "Exceeded",
+};
 
 type Objective = {
   id: string;
@@ -9,7 +17,7 @@ type Objective = {
   description: string | null;
   weight: number;
   reviewCycle: { name: string };
-  reviews: { type: string; rating: number | null; comment: string | null; reviewer: { name: string | null } }[];
+  reviews: { type: string; rating: number | null; comment: string | null; outcome: string | null; reviewer: { name: string | null } }[];
 };
 
 export function ObjectiveEdit({ objective }: { objective: Objective }) {
@@ -18,13 +26,9 @@ export function ObjectiveEdit({ objective }: { objective: Objective }) {
   const [description, setDescription] = useState(objective.description ?? "");
   const [weight, setWeight] = useState(objective.weight);
   const [saving, setSaving] = useState(false);
-  const [selfRating, setSelfRating] = useState(
-    objective.reviews.find((r) => r.type === "SELF")?.rating ?? null
-  );
-  const [selfComment, setSelfComment] = useState(
-    objective.reviews.find((r) => r.type === "SELF")?.comment ?? ""
-  );
-  const [reviewSaving, setReviewSaving] = useState(false);
+
+  const selfReview = objective.reviews.find((r) => r.type === "SELF");
+  const managerReview = objective.reviews.find((r) => r.type === "MANAGER");
 
   async function saveObjective(e: React.FormEvent) {
     e.preventDefault();
@@ -40,27 +44,6 @@ export function ObjectiveEdit({ objective }: { objective: Objective }) {
       setSaving(false);
     }
   }
-
-  async function saveSelfReview() {
-    setReviewSaving(true);
-    try {
-      await fetch("/api/reviews", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          objectiveId: objective.id,
-          type: "SELF",
-          rating: selfRating,
-          comment: selfComment || null,
-        }),
-      });
-      router.refresh();
-    } finally {
-      setReviewSaving(false);
-    }
-  }
-
-  const managerReview = objective.reviews.find((r) => r.type === "MANAGER");
 
   return (
     <div className="govuk-!-margin-top-6">
@@ -116,50 +99,26 @@ export function ObjectiveEdit({ objective }: { objective: Objective }) {
         </div>
       </div>
 
-      <div className="govuk-card govuk-!-margin-bottom-6">
-        <div className="govuk-card__content">
-          <h2 className="govuk-heading-m govuk-!-margin-bottom-4">Self-assessment</h2>
-          <div className="govuk-form-group">
-            <label className="govuk-label" htmlFor="self-rating">
-              Your rating (1–5)
-            </label>
-            <select
-              id="self-rating"
-              className="govuk-select govuk-input--width-5"
-              value={selfRating ?? ""}
-              onChange={(e) => setSelfRating(e.target.value ? Number(e.target.value) : null)}
-            >
-              <option value="">—</option>
-              {[1, 2, 3, 4, 5].map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
+      {selfReview && (
+        <div className="govuk-card govuk-!-margin-bottom-6">
+          <div className="govuk-card__content">
+            <h2 className="govuk-heading-m govuk-!-margin-bottom-2">Self-assessment</h2>
+            <p className="govuk-body govuk-!-margin-bottom-0">
+              Rating: {selfReview.outcome ? OUTCOME_LABEL[selfReview.outcome] ?? selfReview.outcome : (selfReview.rating != null ? `${selfReview.rating}/5` : "—")}
+              {selfReview.comment && (
+                <>
+                  <br />
+                  <span className="govuk-body">{selfReview.comment}</span>
+                </>
+              )}
+            </p>
+            <p className="govuk-body-s govuk-!-margin-top-2 govuk-!-margin-bottom-0">
+              Self-assessments are completed in the{" "}
+              <Link href="/eoy" className="govuk-link">End of year</Link> report.
+            </p>
           </div>
-          <div className="govuk-form-group">
-            <label className="govuk-label" htmlFor="self-comment">
-              Comment
-            </label>
-            <textarea
-              id="self-comment"
-              className="govuk-textarea"
-              rows={3}
-              value={selfComment}
-              onChange={(e) => setSelfComment(e.target.value)}
-              placeholder="Evidence, achievements..."
-            />
-          </div>
-          <button
-            type="button"
-            onClick={saveSelfReview}
-            disabled={reviewSaving}
-            className="govuk-button govuk-button--secondary"
-          >
-            {reviewSaving ? "Saving…" : "Save self-assessment"}
-          </button>
         </div>
-      </div>
+      )}
 
       {managerReview && (
         <div className="govuk-card govuk-card--notification govuk-!-margin-bottom-0">

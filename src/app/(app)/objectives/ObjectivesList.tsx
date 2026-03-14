@@ -9,7 +9,14 @@ type Objective = {
   description: string | null;
   weight: number;
   reviewCycle: { id: string; name: string };
-  reviews: { type: string; rating: number | null; reviewer: { name: string | null } }[];
+  reviews: { type: string; rating: number | null; outcome: string | null; reviewer: { name: string | null } }[];
+};
+
+const OUTCOME_LABEL: Record<string, string> = {
+  NOT_MET: "Not met",
+  PARTIALLY_MET: "Partially met",
+  MET: "Met",
+  EXCEEDED: "Exceeded",
 };
 
 type Cycle = { id: string; name: string };
@@ -91,8 +98,16 @@ export function ObjectivesList({
                       )}
                       <p className="govuk-body-s govuk-!-margin-bottom-0">
                         <span className="govuk-tag govuk-tag--grey govuk-!-margin-right-2">{obj.reviewCycle.name}</span>
-                        {selfReview?.rating != null && <span className="govuk-!-margin-right-2">Self: {selfReview.rating}/5</span>}
-                        {managerReview && <span>Manager: {managerReview.rating ?? "—"}/5</span>}
+                        {selfReview && (selfReview.outcome || selfReview.rating != null) && (
+                          <span className="govuk-!-margin-right-2">
+                            Self: {selfReview.outcome ? OUTCOME_LABEL[selfReview.outcome] ?? selfReview.outcome : `${selfReview.rating}/5`}
+                          </span>
+                        )}
+                        {managerReview && (
+                          <span>
+                            Manager: {managerReview.outcome ? OUTCOME_LABEL[managerReview.outcome] ?? managerReview.outcome : (managerReview.rating ?? "—") + "/5"}
+                          </span>
+                        )}
                       </p>
                     </div>
                     <div className="govuk-grid-column-one-third govuk-!-text-align-right">

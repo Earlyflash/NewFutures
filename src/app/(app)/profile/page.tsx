@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ProfileForm } from "./ProfileForm";
+import { ManagerForm } from "./ManagerForm";
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
@@ -14,7 +15,8 @@ export default async function ProfilePage() {
       email: true,
       name: true,
       role: true,
-      manager: { select: { name: true, email: true } },
+      managerId: true,
+      manager: { select: { id: true, name: true, email: true } },
     },
   });
   if (!user) return null;
@@ -39,6 +41,7 @@ export default async function ProfilePage() {
         </div>
       </dl>
       <ProfileForm defaultName={user.name ?? ""} />
+      <ManagerForm currentManagerId={user.managerId ?? undefined} />
       <p className="govuk-body govuk-!-margin-top-6">
         OIDC stub: profile is created on first sign-in. When you switch to real OIDC, name and role will come from your identity provider.
       </p>

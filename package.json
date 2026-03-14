@@ -11,7 +11,8 @@
     "postinstall": "npm run copy-gds",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "make-hr": "tsx scripts/make-hr.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
